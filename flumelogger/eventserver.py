@@ -122,7 +122,14 @@ class FlumeEventServer(object):
         """
         try:
             if not self.active_nodes:
-                raise StopIteration
+                # fix: it doesn't automatically reconnect to the failed node after it restored
+                log_debug('all nodes disconnected, try reconneting to for all nodes', debug=self.debug)
+                self.reconnect()
+                if self.active_nodes:
+                    log_debug('success reconnected, current active nodes {0}'.format(self.active_nodes), debug=self.debug)
+                else:
+                    log_debug('failed to reconnect to all nodes', debug=self.debug)
+                    raise StopIteration
 
             for node in self.cycle_nodes:
                 try:
